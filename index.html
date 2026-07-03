@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marjorie Flores | Virtual Assistant</title>
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+        --bg: #ffffff;
+        --bg-card: #ffffff;
+        --accent: #d6336c;
+        --accent-light: #ff6fa0;
+        --accent-glow: rgba(214, 51, 108, 0.16);
+        --text: #34222c;
+        --muted: #8c6b7a;
+        --border: rgba(214, 51, 108, 0.2);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #ffffff 0%, #fff0f6 35%, #ffffff 65%, #fff5fa 100%);
+        background-size: 400% 400%;
+        animation: aurora-bg 14s ease infinite;
+        color: var(--text);
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+    @keyframes aurora-bg {
+        0%, 100% { background-position: 0% 50%; }
+        33% { background-position: 100% 0%; }
+        66% { background-position: 50% 100%; }
+    }
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image: radial-gradient(circle, rgba(214,51,108,0.08) 1px, transparent 1px);
+        background-size: 32px 32px;
+        z-index: -2;
+        pointer-events: none;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+    /* SCROLL PROGRESS */
+    .scroll-progress {
+        position: fixed; top: 0; left: 0; height: 3px;
+        background: linear-gradient(90deg, #d6336c, #ff8fbb);
+        z-index: 9999; width: 0%;
+        transition: width 0.1s linear;
+    }
+
+    /* CURSOR GLOW */
+    .cursor-glow {
+        position: fixed;
+        width: 350px; height: 350px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(214,51,108,0.12) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+        transform: translate(-50%, -50%);
+        transition: left 0.08s ease, top 0.08s ease;
+    }
+
+    /* FLOATING RINGS */
+    .ring {
+        position: fixed;
+        border-radius: 50%;
+        border: 1px solid rgba(214,51,108,0.12);
+        pointer-events: none;
+        z-index: -1;
+        animation: ring-pulse 6s ease-in-out infinite;
+    }
+    .ring-1 { width: 300px; height: 300px; top: 10%; left: 5%; animation-delay: 0s; }
+    .ring-2 { width: 500px; height: 500px; top: 20%; right: -100px; animation-delay: 2s; }
+    .ring-3 { width: 200px; height: 200px; bottom: 15%; left: 10%; animation-delay: 4s; }
+    @keyframes ring-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.4; }
+        50% { transform: scale(1.1); opacity: 0.1; }
+    }
+
+    /* NAV */
+    nav {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        padding: 1rem 2rem;
+        display: flex; justify-content: space-between; align-items: center;
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    nav.scrolled { background: rgba(255,255,255,0.97); box-shadow: 0 4px 30px rgba(214,51,108,0.12); }
+    .nav-logo {
+        font-size: 1.1rem; font-weight: 700;
+        background: linear-gradient(90deg, #d6336c, #ff8fbb, #d6336c);
+        background-size: 200% auto;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        animation: label-shine 3s linear infinite;
+    }
+    @keyframes label-shine { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* HERO */
+    .hero {
+        min-height: 100vh;
+        display: flex; align-items: center; justify-content: center; text-align: center;
+        padding: 6rem 2rem 4rem;
+        position: relative; overflow: hidden;
+    }
+    .hero::before {
+        content: '';
+        position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
+        width: 900px; height: 900px;
+        background: radial-gradient(circle, rgba(255,111,160,0.16) 0%, transparent 65%);
+        pointer-events: none;
+    }
+    .hero > div:first-child {
+        animation: hero-enter 1s cubic-bezier(0.16,1,0.3,1) forwards;
+        opacity: 0; transform: translateY(30px);
+        position: relative; z-index: 1;
+    }
+    @keyframes hero-enter { to { opacity: 1; transform: translateY(0); } }
+
+    .hero-photo {
+        width: 140px; height: 140px; border-radius: 50%; overflow: hidden;
+        margin: 0 auto 1.5rem; position: relative;
+        border: 3px solid var(--accent);
+        box-shadow: 0 0 30px var(--accent-glow);
+    }
+    .hero-photo::before {
+        content: ''; position: absolute; inset: -6px; border-radius: 50%;
+        background: conic-gradient(from 0deg, #d6336c, #ff8fbb, #ffd3e4, #d6336c);
+        animation: orbit-spin 3s linear infinite;
+        z-index: -1;
+    }
+    .hero-photo::after {
+        content: ''; position: absolute; inset: -2px; border-radius: 50%;
+        background: var(--bg); z-index: -1;
+    }
+    @keyframes orbit-spin { to { transform: rotate(360deg); } }
+    .hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+
+    .hero-tag {
+        display: inline-block; padding: 0.35rem 1rem;
+        background: rgba(214,51,108,0.1); border: 1px solid var(--border); border-radius: 100px;
+        font-size: 0.78rem; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        animation: badge-float 3s ease-in-out infinite;
+    }
+    @keyframes badge-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+    .hero h1 {
+        font-size: clamp(2.4rem, 6vw, 4.5rem);
+        font-weight: 800; line-height: 1.1; margin-bottom: 1rem;
+        background: linear-gradient(135deg, #d6336c, #ff8fbb, #d6336c, #a61c50);
+        background-size: 300% 300%;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        animation: gradient-shift 4s ease infinite;
+        text-wrap: balance;
+    }
+    @keyframes gradient-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+    .hero-sub {
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        color: var(--muted); max-width: 620px; margin: 0 auto 2.5rem;
+        animation: sub-float 5s ease-in-out infinite;
+    }
+    @keyframes sub-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; }
+    .hero-buttons::after {
+        content: ''; position: absolute; inset: -12px; border-radius: 50px;
+        background: radial-gradient(ellipse at center, rgba(214,51,108,0.1) 0%, transparent 70%);
+        pointer-events: none; animation: btn-ring-pulse 3s ease-in-out infinite;
+    }
+    @keyframes btn-ring-pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.08); opacity: 1; } }
+
+    .btn {
+        padding: 0.75rem 2rem; border-radius: 8px; font-size: 0.95rem; font-weight: 600;
+        cursor: pointer; text-decoration: none; transition: all 0.2s; display: inline-block;
+        position: relative; z-index: 1;
+    }
+    .btn-primary {
+        background: var(--accent); color: #fff; border: none;
+        box-shadow: 0 0 24px var(--accent-glow);
+        position: relative; overflow: hidden;
+        animation: pulse-btn 2.5s ease-in-out infinite;
+    }
+    .btn-primary::after {
+        content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: btn-shimmer 2.5s ease infinite;
+        pointer-events: none;
+    }
+    @keyframes btn-shimmer { 0% { left: -100%; } 60%, 100% { left: 150%; } }
+    @keyframes pulse-btn { 0%, 100% { box-shadow: 0 0 0 0 rgba(214,51,108,0.4); } 50% { box-shadow: 0 0 0 12px rgba(214,51,108,0); } }
+    .btn-primary:hover { background: #b9285d; transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--border); }
+    .btn-outline:hover { background: rgba(214,51,108,0.08); transform: translateY(-2px); }
+
+    .scroll-hint {
+        position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+        display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+        opacity: 0.5; animation: scroll-hint-fade 2s ease-in-out infinite;
+    }
+    .scroll-hint span {
+        display: block; width: 8px; height: 8px;
+        border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+        transform: rotate(45deg);
+        animation: scroll-hint-chevron 1.5s ease infinite;
+    }
+    .scroll-hint span:nth-child(2) { animation-delay: 0.2s; opacity: 0.6; }
+    .scroll-hint span:nth-child(3) { animation-delay: 0.4s; opacity: 0.3; }
+    @keyframes scroll-hint-chevron { 0%, 100% { transform: rotate(45deg) translateY(0); } 50% { transform: rotate(45deg) translateY(4px); } }
+    @keyframes scroll-hint-fade { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.9; } }
+
+    /* SECTIONS */
+    section { padding: 6rem 2rem; max-width: 1080px; margin: 0 auto; position: relative; z-index: 1; }
+    .section-label {
+        font-size: 0.78rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem;
+        background: linear-gradient(90deg, #d6336c 0%, #ffb3cf 50%, #d6336c 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        animation: label-shine 3s linear infinite;
+    }
+    .section-title { font-size: clamp(1.8rem, 4vw, 2.4rem); font-weight: 700; margin-bottom: 0.75rem; }
+    .section-divider {
+        width: 50px; height: 3px;
+        background: linear-gradient(90deg, var(--accent), transparent);
+        margin-bottom: 3rem; border-radius: 2px;
+        box-shadow: 0 0 10px rgba(214,51,108,0.45);
+        animation: divider-grow 1.5s ease forwards;
+        transform-origin: left;
+    }
+    @keyframes divider-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    /* ABOUT */
+    .about-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 3rem; align-items: start; }
+    .about-text p { color: var(--muted); margin-bottom: 1rem; line-height: 1.85; }
+    .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .stat-card {
+        background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+        padding: 1.4rem; text-align: center;
+        transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, border-color 0.2s ease;
+    }
+    .stat-card:hover { border-color: var(--accent); transform: translateY(-10px) scale(1.05); box-shadow: 0 20px 40px rgba(214,51,108,0.18); }
+    .stat-number { font-size: 1.8rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+
+    /* MARQUEE */
+    .tools-marquee-wrapper {
+        overflow: hidden; background: #ffffff;
+        border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+        padding: 1rem 0; margin: 2rem 0;
+    }
+    .tools-marquee-track { display: flex; gap: 1.5rem; width: max-content; animation: marquee-scroll 25s linear infinite; }
+    .tools-marquee-track:hover { animation-play-state: paused; }
+    @keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .marquee-tool {
+        display: flex; align-items: center; gap: 0.5rem;
+        background: #fff2f7; border: 1px solid var(--border); border-radius: 50px;
+        padding: 0.4rem 1rem; font-size: 0.85rem; font-weight: 600; color: var(--accent);
+        white-space: nowrap; cursor: default; transition: background 0.2s, color 0.2s;
+    }
+    .marquee-tool:hover { background: var(--accent); color: white; }
+
+    /* SKILLS */
+    .skills-outer { background: rgba(214,51,108,0.03); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .skills-inner { max-width: 1080px; margin: 0 auto; padding: 6rem 2rem; }
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+    .skill-category {
+        background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;
+        position: relative; overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
+        cursor: default;
+    }
+    .skill-category::after {
+        content: ''; position: absolute; inset: 0; border-radius: inherit;
+        background: radial-gradient(circle at 50% 50%, rgba(255,143,187,0.28), rgba(214,51,108,0.08) 45%, transparent 65%);
+        opacity: 0; transition: opacity 0.3s ease; pointer-events: none; z-index: 0;
+    }
+    .skill-category:hover::after { opacity: 1; }
+    .skill-category > * { position: relative; z-index: 1; }
+    .skill-category:hover { border-color: var(--accent); transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 60px rgba(214,51,108,0.18); }
+    .skill-category h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 1rem; }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .skill-tag {
+        padding: 0.28rem 0.7rem; background: rgba(214,51,108,0.08); border: 1px solid rgba(214,51,108,0.18);
+        border-radius: 100px; font-size: 0.78rem; color: var(--text);
+        opacity: 0; transform: scale(0.6);
+        transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1), background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .skill-tag.tag-visible { opacity: 1; transform: scale(1); }
+    .skill-tag:hover {
+        background: linear-gradient(90deg, #d6336c, #ff8fbb, #ffb3cf) !important;
+        color: white !important; border-color: transparent !important;
+        box-shadow: 0 4px 16px rgba(214,51,108,0.35);
+        transform: scale(1.15) translateY(-2px) !important;
+    }
+
+    /* EXPERIENCE */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+        content: ''; position: absolute; left: 0; top: 6px; bottom: 0; width: 2px;
+        background: linear-gradient(to bottom, var(--accent), transparent 90%);
+        transform: scaleY(0); opacity: 0; transform-origin: top center;
+    }
+    .timeline.tl-ready::before { animation: tl-draw 1.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+    @keyframes tl-draw { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+    .timeline-item { position: relative; margin-bottom: 3rem; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .timeline-item:hover { transform: translateX(8px); box-shadow: -4px 0 20px rgba(214,51,108,0.12); }
+    .timeline-dot {
+        position: absolute; left: -2.35rem; top: 0.45rem; width: 10px; height: 10px; border-radius: 50%;
+        background: var(--accent); box-shadow: 0 0 12px var(--accent-glow);
+        animation: dot-pulse 2s ease-in-out infinite;
+    }
+    @keyframes dot-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(214,51,108,0.5); } 50% { transform: scale(1.3); box-shadow: 0 0 0 8px rgba(214,51,108,0); } }
+    .timeline-date { font-size: 0.78rem; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; margin-bottom: 0.3rem; }
+    .timeline-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.1rem; }
+    .timeline-company { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.8rem; }
+    .timeline-list { list-style: none; }
+    .timeline-list li { color: var(--muted); font-size: 0.88rem; padding: 0.2rem 0 0.2rem 1.2rem; position: relative; line-height: 1.65; }
+    .timeline-list li::before { content: '▹'; position: absolute; left: 0; color: var(--accent); }
+
+    .tl-photo {
+        margin-top: 1rem; display: inline-block; border-radius: 10px; overflow: hidden;
+        border: 1px solid var(--border); cursor: zoom-in;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .tl-photo:hover { transform: translateY(-4px); box-shadow: 0 16px 30px rgba(214,51,108,0.2); }
+    .tl-photo img { display: block; width: 260px; max-width: 100%; height: auto; }
+    .tl-photo figcaption { padding: 0.4rem 0.75rem; background: rgba(214,51,108,0.08); font-size: 0.72rem; color: var(--muted); }
+
+    /* PROJECTS */
+    .project-card {
+        background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+        overflow: hidden; grid-column: span 2;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.2s ease;
+    }
+    .project-card:hover { border-color: var(--accent); transform: translateY(-6px); box-shadow: 0 20px 44px rgba(214,51,108,0.18); }
+    .project-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; padding: 1.5rem; }
+    .project-eyebrow { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 0.5rem; }
+    .project-top h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.75rem; }
+    .project-top p { color: var(--muted); font-size: 0.88rem; line-height: 1.75; margin-bottom: 1rem; }
+    .project-badge {
+        background: rgba(214,51,108,0.08); border: 1px solid var(--border); border-radius: 10px;
+        padding: 1.1rem; min-width: 150px; text-align: center; flex-shrink: 0;
+    }
+    .project-badge .emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+    .project-badge .label { font-size: 0.72rem; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .project-badge .value { font-size: 0.9rem; font-weight: 700; margin-top: 0.2rem; }
+
+    .mock-terminal { background: #1c1116; color: #f0d2df; font-family: "Courier New", monospace; font-size: 11.5px; line-height: 1.55; padding: 14px 16px; }
+    .mock-chrome { display: flex; gap: 6px; padding: 9px 12px; background: #150d10; }
+    .mock-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot-r { background: #e0798c; } .dot-y { background: #e0b579; } .dot-g { background: #8fbf8a; }
+    .mock-terminal .prompt { color: #ff8fbb; }
+    .mock-terminal .muted { color: #a17d8e; }
+    .mock-terminal .redact { background: #3a2530; color: transparent; border-radius: 2px; padding: 0 2px; }
+
+    .mock-browser-chrome { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #f2d6e2; }
+    .mock-url { background: #fbedf3; border-radius: 3px; padding: 3px 10px; font-family: "Courier New", monospace; font-size: 10.5px; color: #8a5c6e; flex: 1; }
+    .mock-browser-body { background: #fffbfd; color: #2a2a20; padding: 22px 18px; font-family: Georgia, serif; }
+    .mock-browser-body .status { font-size: 15px; font-weight: bold; margin-bottom: 10px; }
+    .mock-browser-body .field { font-family: Verdana, sans-serif; font-size: 12px; margin-bottom: 8px; }
+    .mock-browser-body .link { font-family: Verdana, sans-serif; font-size: 11.5px; color: #c22563; text-decoration: underline; }
+
+    /* CONTACT */
+    .contact-card {
+        background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+        padding: 3.5rem 2rem; text-align: center; position: relative; overflow: hidden;
+        animation: contact-pulse 4s ease-in-out infinite;
+    }
+    @keyframes contact-pulse { 0%, 100% { box-shadow: 0 0 0px rgba(214,51,108,0); } 50% { box-shadow: 0 0 80px rgba(214,51,108,0.1), 0 0 120px rgba(255,143,187,0.08); } }
+    .contact-card::before {
+        content: ''; position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, rgba(214,51,108,0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .contact-card::after {
+        content: ''; position: absolute; inset: 0; border-radius: 16px; padding: 2px;
+        background: conic-gradient(from var(--angle, 0deg), #d6336c, #ff8fbb, #ffd3e4, #ff6fa0, #d6336c);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor; mask-composite: exclude;
+        animation: border-rotate 4s linear infinite;
+        pointer-events: none;
+    }
+    @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+    @keyframes border-rotate { to { --angle: 360deg; } }
+    .contact-card h2 { font-size: 1.9rem; font-weight: 700; margin-bottom: 0.75rem; position: relative; }
+    .contact-card p { color: var(--muted); max-width: 480px; margin: 0 auto 2.5rem; position: relative; }
+    .contact-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem; position: relative; }
+    .contact-link { display: flex; align-items: center; gap: 0.6rem; color: var(--muted); text-decoration: none; font-size: 0.88rem; transition: color 0.2s, transform 0.2s; }
+    .contact-link:hover { color: var(--accent); transform: translateY(-2px); }
+    .contact-icon {
+        width: 38px; height: 38px; background: rgba(214,51,108,0.1); border: 1px solid var(--border); border-radius: 8px;
+        display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+    }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--border); position: relative; overflow: hidden; }
+    footer::before {
+        content: ''; position: absolute; top: 0; left: -100%; width: 300%; height: 1px;
+        background: linear-gradient(90deg, transparent, #d6336c, #ff8fbb, #d6336c, transparent);
+        animation: footer-wave 4s linear infinite;
+    }
+    @keyframes footer-wave { 0% { left: -100%; } 100% { left: 100%; } }
+
+    /* LIGHTBOX */
+    .lightbox-overlay {
+        position: fixed; inset: 0; background: rgba(40,10,25,0.88); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none; transition: opacity 0.35s ease; backdrop-filter: blur(8px);
+    }
+    .lightbox-overlay.active { opacity: 1; pointer-events: all; }
+    .lightbox-img-wrap { position: relative; max-width: 90vw; max-height: 88vh; transform: scale(0.85); transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); }
+    .lightbox-overlay.active .lightbox-img-wrap { transform: scale(1); }
+    .lightbox-img-wrap img { max-width: 90vw; max-height: 85vh; border-radius: 14px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); display: block; }
+    .lightbox-close {
+        position: absolute; top: -18px; right: -18px; width: 38px; height: 38px; border-radius: 50%;
+        background: #d6336c; color: white; border: none; font-size: 1.1rem; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 20px rgba(214,51,108,0.5); transition: transform 0.2s, background 0.2s;
+    }
+    .lightbox-close:hover { transform: scale(1.15); background: #b9285d; }
+    .lightbox-caption { text-align: center; color: rgba(255,255,255,0.7); font-size: 0.85rem; margin-top: 0.75rem; }
+
+    /* REVEAL */
+    .reveal { opacity: 0; transform: translateY(50px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 860px) {
+        .about-grid { grid-template-columns: 1fr; }
+        .nav-links { display: none; }
+        .project-badge { margin: 0 auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        body, .hero h1, .nav-logo, .section-label, .hero-tag, .hero-sub, .hero-photo::before,
+        .btn-primary, .btn-primary::after, .hero-buttons::after, .scroll-hint, .scroll-hint span,
+        .timeline-dot, .contact-card, .contact-card::after, footer::before, .ring, .marquee-tool,
+        .tools-marquee-track {
+            animation: none !important;
+        }
+        .cursor-glow { display: none; }
+    }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<div class="ring ring-1"></div>
+<div class="ring ring-2"></div>
+<div class="ring ring-3"></div>
+
+<div class="lightbox-overlay" id="lightbox">
+    <div class="lightbox-img-wrap">
+        <button class="lightbox-close" id="lightboxClose">&#10005;</button>
+        <img id="lightboxImg" src="" alt="">
+        <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+</div>
+
+<nav id="mainNav">
+    <div class="nav-logo">Marjorie Flores</div>
+    <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+</nav>
+
+<div class="hero">
+    <div>
+        <div class="hero-photo">
+            <img src="images/profile.jpg" alt="Marjorie Flores">
+        </div>
+        <div class="hero-tag">Available for Remote Work</div>
+        <h1>Marjorie Flores</h1>
+        <p class="hero-sub">Virtual Assistant blending a teaching background, customer service skills, and hands-on business knowledge to help teams stay organized and run smoothly.</p>
+        <div class="hero-buttons">
+            <a href="#contact" class="btn btn-primary">Work With Me</a>
+            <a href="#experience" class="btn btn-outline">View My Experience</a>
+        </div>
+    </div>
+    <div class="scroll-hint"><span></span><span></span><span></span></div>
+</div>
+
+<section id="about" class="reveal">
+    <div class="section-label">Who I Am</div>
+    <h2 class="section-title">About Me</h2>
+    <div class="section-divider"></div>
+    <div class="about-grid">
+        <div class="about-text">
+            <p>I am Marjorie Flores, a professional teacher from the Philippines with a strong mix of customer service, business, and educational experience. I previously worked as a sales assistant, managed my own online small business selling mixed items and posting it on Facebook, and served as a tutor at ARC's Learning Center for six months.</p>
+            <p>I am highly organized, detail-oriented, and a clear communicator who learns new tools quickly. I am reliable, disciplined, and committed to delivering consistent quality work.</p>
+            <p>I'm currently building my AI Automation skills because I want to learn how to automate repetitive tasks, improve productivity, and gain skills that are valuable in today's technology-driven workplace. My goal is to build practical automations that save time, improve workflows, and help me grow professionally, so I can help your team run smoothly and focus on what matters most.</p>
+        </div>
+        <div class="about-stats">
+            <div class="stat-card reveal">
+                <div class="stat-number">Licensed</div>
+                <div class="stat-label">Professional Teacher</div>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-number">6 Mo.</div>
+                <div class="stat-label">Tutoring at ARC's Learning Center</div>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Remote Ready</div>
+            </div>
+            <div class="stat-card reveal">
+                <div class="stat-number">AI</div>
+                <div class="stat-label">Automation Trainee</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="tools-marquee-wrapper reveal">
+    <div class="tools-marquee-track">
+        <div class="marquee-tool"><span>&#128218;</span> Lesson Planning</div>
+        <div class="marquee-tool"><span>&#128172;</span> Customer Support</div>
+        <div class="marquee-tool"><span>&#128722;</span> Online Selling</div>
+        <div class="marquee-tool"><span>&#129302;</span> ChatGPT</div>
+        <div class="marquee-tool"><span>&#129302;</span> Claude AI</div>
+        <div class="marquee-tool"><span>&#128193;</span> Digital Records</div>
+        <div class="marquee-tool"><span>&#128221;</span> Order Coordination</div>
+        <div class="marquee-tool"><span>&#128197;</span> Scheduling</div>
+        <div class="marquee-tool"><span>&#9997;</span> Clear Communication</div>
+        <div class="marquee-tool"><span>&#128260;</span> Workflow Automation</div>
+        <!-- duplicate for seamless loop -->
+        <div class="marquee-tool"><span>&#128218;</span> Lesson Planning</div>
+        <div class="marquee-tool"><span>&#128172;</span> Customer Support</div>
+        <div class="marquee-tool"><span>&#128722;</span> Online Selling</div>
+        <div class="marquee-tool"><span>&#129302;</span> ChatGPT</div>
+        <div class="marquee-tool"><span>&#129302;</span> Claude AI</div>
+        <div class="marquee-tool"><span>&#128193;</span> Digital Records</div>
+        <div class="marquee-tool"><span>&#128221;</span> Order Coordination</div>
+        <div class="marquee-tool"><span>&#128197;</span> Scheduling</div>
+        <div class="marquee-tool"><span>&#9997;</span> Clear Communication</div>
+        <div class="marquee-tool"><span>&#128260;</span> Workflow Automation</div>
+    </div>
+</div>
+
+<div class="skills-outer reveal">
+    <div class="skills-inner">
+        <div class="section-label">What I Bring</div>
+        <h2 class="section-title" id="skills">Skills</h2>
+        <div class="section-divider"></div>
+        <div class="skills-grid">
+            <div class="skill-category">
+                <h3>Teaching &amp; Tutoring</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">Lesson Planning</span>
+                    <span class="skill-tag">One-on-One Instruction</span>
+                    <span class="skill-tag">Academic Coaching</span>
+                    <span class="skill-tag">Progress Tracking</span>
+                </div>
+            </div>
+            <div class="skill-category">
+                <h3>Sales &amp; Customer Support</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">Customer Inquiries</span>
+                    <span class="skill-tag">Transactions</span>
+                    <span class="skill-tag">Client Communication</span>
+                    <span class="skill-tag">Complaint Resolution</span>
+                </div>
+            </div>
+            <div class="skill-category">
+                <h3>E-commerce &amp; Business Ops</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">Product Listing</span>
+                    <span class="skill-tag">Inventory Checks</span>
+                    <span class="skill-tag">Order Coordination</span>
+                    <span class="skill-tag">Online Store Management</span>
+                </div>
+            </div>
+            <div class="skill-category">
+                <h3>AI &amp; Automation</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">ChatGPT</span>
+                    <span class="skill-tag">Claude AI</span>
+                    <span class="skill-tag">Workflow Automation</span>
+                    <span class="skill-tag">API / Webhook Basics</span>
+                </div>
+            </div>
+            <div class="skill-category">
+                <h3>Admin &amp; Organization</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">Digital Records</span>
+                    <span class="skill-tag">Scheduling</span>
+                    <span class="skill-tag">Documentation</span>
+                    <span class="skill-tag">Data Entry</span>
+                </div>
+            </div>
+            <div class="skill-category">
+                <h3>Soft Skills</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">Reliable</span>
+                    <span class="skill-tag">Patient</span>
+                    <span class="skill-tag">Adaptable</span>
+                    <span class="skill-tag">Fast Learner</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section id="experience" class="reveal">
+    <div class="section-label">Where I've Worked</div>
+    <h2 class="section-title">Experience</h2>
+    <div class="section-divider"></div>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">6 Months</div>
+            <div class="timeline-title">Tutor</div>
+            <div class="timeline-company">ARC's Learning Center</div>
+            <ul class="timeline-list">
+                <li>Helped students strengthen their learning and academic skills one-on-one</li>
+                <li>Planned lessons and tracked progress across sessions</li>
+                <li>Worked closely with a small team of tutors in a shared learning center</li>
+            </ul>
+            <figure class="tl-photo" onclick="openLightbox(this.querySelector('img'))">
+                <img src="images/arcs-learning-center.jpg" alt="Marjorie with the team at ARC's Learning Center">
+                <figcaption>With the team at ARC's Learning Center</figcaption>
+            </figure>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">Prior Experience</div>
+            <div class="timeline-title">Owner</div>
+            <div class="timeline-company">Online Mixed-Items Shop</div>
+            <ul class="timeline-list">
+                <li>Ran product posting, customer inquiries, and order coordination single-handedly</li>
+                <li>Managed the full sales cycle from listing to fulfillment</li>
+            </ul>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">Prior Experience</div>
+            <div class="timeline-title">Sales Assistant</div>
+            <div class="timeline-company">Retail</div>
+            <ul class="timeline-list">
+                <li>Handled customer-facing work, including inquiries, transactions, and day-to-day floor operations</li>
+            </ul>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">Prior Experience</div>
+            <div class="timeline-title">Licensed / Professional Teacher</div>
+            <div class="timeline-company">Classroom Teaching</div>
+            <ul class="timeline-list">
+                <li>Planned lessons, explained ideas clearly, and kept a classroom organized and on schedule</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section id="projects" class="reveal">
+    <div class="section-label">AI Automation Practice</div>
+    <h2 class="section-title">Projects</h2>
+    <div class="section-divider"></div>
+    <p style="color: var(--muted); font-size: 0.9rem; max-width: 60ch; margin-bottom: 2rem;">Hands-on projects from AI Automation training, built to learn how to save time, streamline workflows, and support a business the way I'd want to support yours.</p>
+    <div class="skills-grid">
+        <div class="project-card">
+            <div class="project-top">
+                <div>
+                    <div class="project-eyebrow">Command-Line Automation</div>
+                    <h3>Discord Webhook Automation</h3>
+                    <p>A command-line automation that posts formatted messages straight into a Discord channel via its webhook API, with no manual copy-pasting required.</p>
+                    <div class="skill-tags">
+                        <span class="skill-tag tag-visible">REST APIs</span>
+                        <span class="skill-tag tag-visible">JSON Payloads</span>
+                        <span class="skill-tag tag-visible">CLI Tools</span>
+                    </div>
+                </div>
+                <div class="project-badge">
+                    <div class="emoji">&#128421;</div>
+                    <div class="label">Built with</div>
+                    <div class="value">curl + REST API</div>
+                </div>
+            </div>
+            <div class="mock-chrome">
+                <span class="mock-dot dot-r"></span><span class="mock-dot dot-y"></span><span class="mock-dot dot-g"></span>
+            </div>
+            <div class="mock-terminal">
+                <div><span class="prompt">C:\Users\Marjorie&gt;</span> curl.exe -X POST "https://discord.com/api/webhooks/<span class="redact">1503758253&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>" ^</div>
+                <div class="muted">More? -H "Content-Type: application/json" ^</div>
+                <div class="muted">More? -d "{"content":"Hi everyone! My name is Marjorie Flores..."}"</div>
+                <div>&nbsp;</div>
+                <div class="prompt">C:\Users\Marjorie&gt;</div>
+            </div>
+        </div>
+
+        <div class="project-card">
+            <div class="project-top">
+                <div>
+                    <div class="project-eyebrow">AI Web App</div>
+                    <h3>AI Blog Generator</h3>
+                    <p>A Python web app backed by a SQL database that generates ready-to-publish blog posts on demand, turning a content task into a one-click workflow.</p>
+                    <div class="skill-tags">
+                        <span class="skill-tag tag-visible">Python</span>
+                        <span class="skill-tag tag-visible">SQL</span>
+                        <span class="skill-tag tag-visible">Web Apps</span>
+                    </div>
+                </div>
+                <div class="project-badge">
+                    <div class="emoji">&#128203;</div>
+                    <div class="label">Built with</div>
+                    <div class="value">Python + SQL</div>
+                </div>
+            </div>
+            <div class="mock-browser-chrome">
+                <span class="mock-dot dot-r"></span><span class="mock-dot dot-y"></span><span class="mock-dot dot-g"></span>
+                <div class="mock-url">127.0.0.1:8000/generate/</div>
+            </div>
+            <div class="mock-browser-body">
+                <div class="status">Blog Generated Successfully!</div>
+                <div class="field"><strong>Title:</strong> How AI Helps Small Businesses Grow</div>
+                <div class="link">Go Back</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contact" class="reveal">
+    <div class="contact-card">
+        <div class="section-label">Get In Touch</div>
+        <h2>Let's Work Together</h2>
+        <p>Available for remote Virtual Assistant work. Reach out by email or phone and I'll get back to you promptly.</p>
+        <div class="contact-links">
+            <a href="mailto:marjeefloress12@gmail.com" class="contact-link">
+                <span class="contact-icon">&#9993;</span> marjeefloress12@gmail.com
+            </a>
+            <a href="tel:+639817457108" class="contact-link">
+                <span class="contact-icon">&#128241;</span> 0981 745 7108
+            </a>
+        </div>
+        <a href="mailto:marjeefloress12@gmail.com" class="btn btn-primary">Send Me a Message</a>
+    </div>
+</section>
+
+<footer>
+    &copy; 2026 Marjorie Flores &middot; Virtual Assistant &middot; Philippines
+</footer>
+
+<script>
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // NAV SCROLL SHADOW
+    var nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', function () {
+        if (window.scrollY > 20) nav.classList.add('scrolled');
+        else nav.classList.remove('scrolled');
+    });
+
+    // SCROLL PROGRESS BAR
+    var progress = document.getElementById('scrollProgress');
+    window.addEventListener('scroll', function () {
+        var h = document.documentElement;
+        var pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+        progress.style.width = pct + '%';
+    });
+
+    // CURSOR GLOW
+    if (!reduceMotion && !('ontouchstart' in window)) {
+        var glow = document.getElementById('cursorGlow');
+        window.addEventListener('mousemove', function (e) {
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+    }
+
+    // SCROLL REVEAL
+    var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                if (entry.target.classList.contains('timeline')) entry.target.classList.add('tl-ready');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    document.querySelectorAll('.reveal').forEach(function (el) { revealObserver.observe(el); });
+    var timelineEl = document.querySelector('.timeline');
+    if (timelineEl) revealObserver.observe(timelineEl);
+
+    // SKILL TAG STAGGER
+    var tagObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                var tags = entry.target.querySelectorAll('.skill-tag');
+                tags.forEach(function (tag, i) {
+                    setTimeout(function () { tag.classList.add('tag-visible'); }, i * 70);
+                });
+                tagObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.2 });
+    document.querySelectorAll('.skill-category').forEach(function (c) { tagObserver.observe(c); });
+
+    // LIGHTBOX
+    var lightbox = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightboxImg');
+    var lightboxCaption = document.getElementById('lightboxCaption');
+    function openLightbox(imgEl) {
+        lightboxImg.src = imgEl.src;
+        lightboxImg.alt = imgEl.alt;
+        lightboxCaption.textContent = imgEl.alt;
+        lightbox.classList.add('active');
+    }
+    document.getElementById('lightboxClose').addEventListener('click', function () {
+        lightbox.classList.remove('active');
+    });
+    lightbox.addEventListener('click', function (e) {
+        if (e.target === lightbox) lightbox.classList.remove('active');
+    });
+</script>
+</body>
+</html>
